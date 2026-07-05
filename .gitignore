@@ -1,0 +1,14 @@
+*.pem
+*.key
+poc_artifacts/
+payproof_keys/
+.env
+secure_boot_signing_key*
+venv/
+env/
+__pycache__/
+*.pyc
+build/
+managed_components/
+sdkconfig
+sdkconfig.old
