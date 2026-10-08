@@ -1,0 +1,78 @@
+========================================================
+PayProof Gateway Simulator — Blueprint v2.3 PoC
+========================================================
+[GATEWAY] Loading artifacts from /home/jaah/esp_puf_s3/poc_artifacts
+[GATEWAY] Certificate loaded: 444 bytes
+[GATEWAY] Gateway private key loaded.
+
+[GATEWAY] Opening serial port /dev/ttyUSB0 at 115200 baud...
+[GATEWAY] Listening. Waiting for terminal to initiate handshake.
+[GATEWAY] Press Ctrl+C to stop.
+
+[GATEWAY] Waiting for terminal READY marker...
+[GATEWAY] Terminal READY.
+[GATEWAY] Sending initiation signal to terminal.
+[STATE]   IDLE → CERT_SENT
+[TX]      Sending certificate (444 bytes) + nonce (32 bytes)
+[RX]      Waiting for Terminal_Challenge (32 bytes, timeout=2000ms)...
+[STATE]   CERT_SENT → CHALLENGE_RECEIVED
+[RX]      Terminal_Challenge: 3a88ba9507b92dc4...
+[SIGN]    Signing Terminal_Challenge with Gateway private key...
+[STATE]   CHALLENGE_RECEIVED → SIG_SENT
+[TX]      Sent signature (71 bytes): 3045022100d2d335...
+[RX]      Waiting for Sealed Transaction Record (timeout=5000ms)...
+[STATE]   SIG_SENT → RECORD_RECEIVED
+[RX]      Record received: 122 bytes
+[CHECK]   Gateway_Nonce match: OK
+[CHECK]   Terminal ID:    ac:27:6e:a5:86:fc
+[CHECK]   eFuse Counter:  11
+[CHECK]   Timestamp:      0 (untrusted, audit only)
+[DISCARD] Reason: Replay detected: counter 11 <= last accepted 1000 for ac:27:6e:a5:86:fc
+[DISCARD] Zeroized 2 partial buffer(s).
+[DISCARD] fail_counter = 1/3
+[GATEWAY] Waiting for terminal READY marker...
+[GATEWAY] Terminal READY.
+[GATEWAY] Sending initiation signal to terminal.
+[STATE]   IDLE → CERT_SENT
+[TX]      Sending certificate (444 bytes) + nonce (32 bytes)
+[RX]      Waiting for Terminal_Challenge (32 bytes, timeout=2000ms)...
+[STATE]   CERT_SENT → CHALLENGE_RECEIVED
+[RX]      Terminal_Challenge: a30e31a94ee3c37c...
+[SIGN]    Signing Terminal_Challenge with Gateway private key...
+[STATE]   CHALLENGE_RECEIVED → SIG_SENT
+[TX]      Sent signature (71 bytes): 30450221008e8fc1...
+[RX]      Waiting for Sealed Transaction Record (timeout=5000ms)...
+[STATE]   SIG_SENT → RECORD_RECEIVED
+[RX]      Record received: 122 bytes
+[CHECK]   Gateway_Nonce match: OK
+[CHECK]   Terminal ID:    ac:27:6e:a5:86:fc
+[CHECK]   eFuse Counter:  12
+[CHECK]   Timestamp:      0 (untrusted, audit only)
+[DISCARD] Reason: Replay detected: counter 12 <= last accepted 1000 for ac:27:6e:a5:86:fc
+[DISCARD] Zeroized 2 partial buffer(s).
+[DISCARD] fail_counter = 2/3
+[GATEWAY] Waiting for terminal READY marker...
+[GATEWAY] Terminal READY.
+[GATEWAY] Sending initiation signal to terminal.
+[STATE]   IDLE → CERT_SENT
+[TX]      Sending certificate (444 bytes) + nonce (32 bytes)
+[RX]      Waiting for Terminal_Challenge (32 bytes, timeout=2000ms)...
+[STATE]   CERT_SENT → CHALLENGE_RECEIVED
+[RX]      Terminal_Challenge: 3c350eb7a3237db6...
+[SIGN]    Signing Terminal_Challenge with Gateway private key...
+[STATE]   CHALLENGE_RECEIVED → SIG_SENT
+[TX]      Sent signature (71 bytes): 3045022100ce1fce...
+[RX]      Waiting for Sealed Transaction Record (timeout=5000ms)...
+[STATE]   SIG_SENT → RECORD_RECEIVED
+[RX]      Record received: 122 bytes
+[CHECK]   Gateway_Nonce match: OK
+[CHECK]   Terminal ID:    ac:27:6e:a5:86:fc
+[CHECK]   eFuse Counter:  13
+[CHECK]   Timestamp:      0 (untrusted, audit only)
+[DISCARD] Reason: Replay detected: counter 13 <= last accepted 1000 for ac:27:6e:a5:86:fc
+[DISCARD] Zeroized 2 partial buffer(s).
+[DISCARD] fail_counter = 3/3
+[SLEEP]   Fail threshold reached. Enforcing 60s backoff.
+[SLEEP]   Backoff resets only on TRANSACTION_VALID.
+
+[GATEWAY] Stopped by user.

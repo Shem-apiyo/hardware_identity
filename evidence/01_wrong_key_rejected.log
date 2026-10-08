@@ -1,0 +1,82 @@
+[GATEWAY] Loading artifacts from /home/jaah/esp_puf_s3/poc_artifacts
+[GATEWAY] Certificate loaded: 444 bytes
+[GATEWAY] Gateway private key loaded.
+
+[TEST] Gateway now expects a DIFFERENT terminal key. Every record must be rejected.
+[GATEWAY] Opening serial port /dev/ttyUSB0 at 115200 baud...
+[GATEWAY] Listening. Waiting for terminal to initiate handshake.
+[GATEWAY] Press Ctrl+C to stop.
+
+[GATEWAY] Waiting for terminal READY marker...
+[GATEWAY] Terminal READY.
+[GATEWAY] Sending initiation signal to terminal.
+[STATE]   IDLE → CERT_SENT
+[TX]      Sending certificate (444 bytes) + nonce (32 bytes)
+[RX]      Waiting for Terminal_Challenge (32 bytes, timeout=2000ms)...
+[STATE]   CERT_SENT → CHALLENGE_RECEIVED
+[RX]      Terminal_Challenge: 57e04097a5bbaa2b...
+[SIGN]    Signing Terminal_Challenge with Gateway private key...
+[STATE]   CHALLENGE_RECEIVED → SIG_SENT
+[TX]      Sent signature (70 bytes): 3044022013c9cd84...
+[RX]      Waiting for Sealed Transaction Record (timeout=5000ms)...
+[STATE]   SIG_SENT → RECORD_RECEIVED
+[RX]      Record received: 122 bytes
+[CHECK]   Gateway_Nonce match: OK
+[CHECK]   Terminal ID:    ac:27:6e:a5:86:fc
+[CHECK]   eFuse Counter:  8
+[CHECK]   Timestamp:      0 (untrusted, audit only)
+[CHECK]   Counter monotonic: 8 > 7 OK
+[SCHEMA]  schema_id = 0x01 (PayProof KES payment)
+[DISCARD] Reason: Terminal ECDSA signature verification FAILED
+[DISCARD] Zeroized 2 partial buffer(s).
+[DISCARD] fail_counter = 1/3
+[GATEWAY] Waiting for terminal READY marker...
+[GATEWAY] Terminal READY.
+[GATEWAY] Sending initiation signal to terminal.
+[STATE]   IDLE → CERT_SENT
+[TX]      Sending certificate (444 bytes) + nonce (32 bytes)
+[RX]      Waiting for Terminal_Challenge (32 bytes, timeout=2000ms)...
+[STATE]   CERT_SENT → CHALLENGE_RECEIVED
+[RX]      Terminal_Challenge: 6c67872402e874da...
+[SIGN]    Signing Terminal_Challenge with Gateway private key...
+[STATE]   CHALLENGE_RECEIVED → SIG_SENT
+[TX]      Sent signature (71 bytes): 3045022008eeb781...
+[RX]      Waiting for Sealed Transaction Record (timeout=5000ms)...
+[STATE]   SIG_SENT → RECORD_RECEIVED
+[RX]      Record received: 122 bytes
+[CHECK]   Gateway_Nonce match: OK
+[CHECK]   Terminal ID:    ac:27:6e:a5:86:fc
+[CHECK]   eFuse Counter:  9
+[CHECK]   Timestamp:      0 (untrusted, audit only)
+[CHECK]   Counter monotonic: 9 > 7 OK
+[SCHEMA]  schema_id = 0x01 (PayProof KES payment)
+[DISCARD] Reason: Terminal ECDSA signature verification FAILED
+[DISCARD] Zeroized 2 partial buffer(s).
+[DISCARD] fail_counter = 2/3
+[GATEWAY] Waiting for terminal READY marker...
+[GATEWAY] Terminal READY.
+[GATEWAY] Sending initiation signal to terminal.
+[STATE]   IDLE → CERT_SENT
+[TX]      Sending certificate (444 bytes) + nonce (32 bytes)
+[RX]      Waiting for Terminal_Challenge (32 bytes, timeout=2000ms)...
+[STATE]   CERT_SENT → CHALLENGE_RECEIVED
+[RX]      Terminal_Challenge: 1e732b195e233477...
+[SIGN]    Signing Terminal_Challenge with Gateway private key...
+[STATE]   CHALLENGE_RECEIVED → SIG_SENT
+[TX]      Sent signature (71 bytes): 304502204cad5477...
+[RX]      Waiting for Sealed Transaction Record (timeout=5000ms)...
+[STATE]   SIG_SENT → RECORD_RECEIVED
+[RX]      Record received: 122 bytes
+[CHECK]   Gateway_Nonce match: OK
+[CHECK]   Terminal ID:    ac:27:6e:a5:86:fc
+[CHECK]   eFuse Counter:  10
+[CHECK]   Timestamp:      0 (untrusted, audit only)
+[CHECK]   Counter monotonic: 10 > 7 OK
+[SCHEMA]  schema_id = 0x01 (PayProof KES payment)
+[DISCARD] Reason: Terminal ECDSA signature verification FAILED
+[DISCARD] Zeroized 2 partial buffer(s).
+[DISCARD] fail_counter = 3/3
+[SLEEP]   Fail threshold reached. Enforcing 60s backoff.
+[SLEEP]   Backoff resets only on TRANSACTION_VALID.
+
+[GATEWAY] Stopped by user.
