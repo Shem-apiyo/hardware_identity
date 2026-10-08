@@ -1,0 +1,88 @@
+Script started on 2026-10-08 05:19:47+00:00 [COMMAND="idf.py -p /dev/ttyACM0 monitor" TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="97" LINES="40"]
+Executing action: monitor
+Running idf_monitor in directory /home/jaah/esp_puf_s3
+Executing "/home/jaah/.espressif/python_env/idf6.0_py3.14_env/bin/python /home/jaah/esp/esp-idf/tools/idf_monitor.py -p /dev/ttyACM0 -b 115200 --toolchain-prefix xtensa-esp32s3-elf- --target esp32s3 --revision 0 /home/jaah/esp_puf_s3/build/terminal_firmware.elf /home/jaah/esp_puf_s3/build/bootloader/bootloader.elf -m '/home/jaah/.espressif/python_env/idf6.0_py3.14_env/bin/python' '/home/jaah/esp/esp-idf/tools/idf.py' '-p' '/dev/ttyACM0'"...
+--- esp-idf-monitor 1.10.0 on /dev/ttyACM0 115200
+--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x403790ee
+--- 0x403790ee: esp_cpu_wait_for_intr at /home/jaah/esp/esp-idf/components/esp_hw_support/cpu.c:64
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x146c
+load:0x403c8700,len:0xd10
+--- 0x403c8700: _stext at ??:?
+load:0x403cb700,len:0x2f3c
+entry 0x403c88f8
+--- 0x403c88f8: call_start_cpu0 at /home/jaah/esp/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+I (24) boot: ESP-IDF 71722673 2nd stage bootloader
+I (24) boot: compile time Oct  8 2026 04:39:10
+I (25) boot: chip revision: v0.2
+I (25) boot.esp32s3: Boot SPI Speed : 80MHz
+I (26) boot.esp32s3: SPI Mode       : DIO
+I (27) boot.esp32s3: SPI Flash Size : 4MB
+I (29) boot: Partition Table:
+I (30) boot: ## Label            Usage          Type ST Offset   Length
+I (32) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (36) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (41) boot:  2 factory          factory app      00 00 00010000 00177000
+I (45) esp_image: segment 0: paddr=00010020 vaddr=3c030020 size=0dadch ( 56028) map
+I (56) esp_image: segment 1: paddr=0001db04 vaddr=3fc91a00 size=02514h (  9492) load
+I (58) esp_image: segment 2: paddr=00020020 vaddr=42000020 size=2959ch (169372) map
+I (90) esp_image: segment 3: paddr=000495c4 vaddr=3fc93f14 size=00db8h (  3512) load
+I (91) esp_image: segment 4: paddr=0004a384 vaddr=40374000 size=0d9cch ( 55756) load
+I (105) esp_image: segment 5: paddr=00057d58 vaddr=50000000 size=00024h (    36) load
+I (111) boot: Loaded app from partition at offset 0x10000
+I (112) cpu_start: Multicore app
+I (121) cpu_start: Pro cpu start user code
+I (121) cpu_start: cpu freq: 160000000 Hz
+I (121) app_init: Application information:
+I (124) app_init: Project name:     terminal_firmware
+I (124) app_init: App version:      7f2a648-dirty
+I (125) app_init: Compile time:     Oct  8 2026 04:40:09
+I (126) app_init: ELF file SHA256:  99db47cc3...
+I (127) app_init: ESP-IDF:          71722673
+I (128) efuse_init: Min chip rev:     v0.0
+I (129) efuse_init: Max chip rev:     v0.99 
+I (130) efuse_init: Chip rev:         v0.2
+I (132) heap_init: Initializing. RAM available for dynamic allocation:
+I (134) heap_init: At 3FC95CC0 len 00053A50 (334 KiB): RAM
+I (134) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (135) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (136) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM
+I (138) spi_flash: detected chip: boya
+I (138) spi_flash: flash io: dio
+W (139) spi_flash: Detected size(16384k) larger than the size in the binary image header(4096k). Using the size in the binary image header.
+I (141) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (143) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (145) main_task: Started on CPU0
+I (145) main_task: Calling app_main()
+I (145) TERMINAL: PayProof Terminal v2.3 PoC
+I (145) TERMINAL: Internal heap: 382712 bytes
+I (165) TERMINAL: NVS ready
+I (165) TERMINAL: PSA crypto ready
+I (165) TERMINAL: UART0 ready at 115200. Waiting for gateway...
+I (12215) TERMINAL: Gateway initiation. Starting handshake.
+I (12215) TERMINAL: [STATE] IDLE -> waiting for cert+nonce
+I (12275) TERMINAL: [RX] Cert=372 bytes nonce=32 bytes
+E (12685) TERMINAL: Cert verify FAILED: -0x2700 flags=0x00000008
+W (12685) TERMINAL: [DISCARD] Gateway cert invalid
+W (12685) TERMINAL: [DISCARD] fail_counter=1/3
+I (14735) TERMINAL: Gateway initiation. Starting handshake.
+I (14735) TERMINAL: [STATE] IDLE -> waiting for cert+nonce
+I (14785) TERMINAL: [RX] Cert=372 bytes nonce=32 bytes
+E (15195) TERMINAL: Cert verify FAILED: -0x2700 flags=0x00000008
+W (15195) TERMINAL: [DISCARD] Gateway cert invalid
+W (15195) TERMINAL: [DISCARD] fail_counter=2/3
+I (17265) TERMINAL: Gateway initiation. Starting handshake.
+I (17265) TERMINAL: [STATE] IDLE -> waiting for cert+nonce
+I (17315) TERMINAL: [RX] Cert=372 bytes nonce=32 bytes
+E (17725) TERMINAL: Cert verify FAILED: -0x2700 flags=0x00000008
+W (17725) TERMINAL: [DISCARD] Gateway cert invalid
+W (17725) TERMINAL: [DISCARD] fail_counter=3/3
+E (17725) TERMINAL: [SLEEP] Backoff 60000ms — RAM counter persists
+
+
+Script done on 2026-10-08 05:20:33+00:00 [COMMAND_EXIT_CODE="0"]
