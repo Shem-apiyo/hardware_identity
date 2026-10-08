@@ -12,7 +12,7 @@
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/platform_util.h"
-#include "root_pubkey.h"
+#include "root_ca_cert.h"
 #include "esp_hmac.h"
 #include "nvs_flash.h"
 #include "nvs.h"
@@ -36,6 +36,9 @@ static const uint8_t DEVICE_ROOT_HMAC_MESSAGE[] = "PayProof-Terminal-v2.3-Device
 
 /* RAM-only fail counter — Blueprint v2.3: never written to NVS */
 static volatile int fail_counter = 0;
+
+/* READY marker: sent while idle so the gateway knows when to start */
+static const uint8_t READY_MARKER[8] = { 0xA5, 'P', 'P', 'R', 'D', 'Y', 0x5A, 0x0A };
 
 /* ── UART helpers ── */
 static int uart_recv_exact(uint8_t *buf, int len, int timeout_ms)
@@ -132,7 +135,7 @@ static void run_handshake(void)
     ESP_LOGI(TAG, "[RX] Cert=%d bytes nonce=32 bytes", cert_len);
 
     /* ── Step 2: Verify gateway certificate against Root CA ── */
-    ret = mbedtls_x509_crt_parse_der(&root_cert, ROOT_CA_PUBKEY, ROOT_CA_PUBKEY_len);
+    ret = mbedtls_x509_crt_parse_der(&root_cert, ROOT_CA_CERT, ROOT_CA_CERT_len);
     if (ret != 0) {
         discard("Root CA parse failed", gateway_nonce, NONCE_LEN, NULL, 0);
         goto cleanup;
@@ -366,8 +369,10 @@ void app_main(void)
 
     while (1) {
         uint8_t init_byte;
-        int r = uart_read_bytes(UART_PORT, &init_byte, 1, pdMS_TO_TICKS(100));
-        if (r > 0) {
+        uart_flush_input(UART_PORT);
+        uart_write_bytes(UART_PORT, (const char *)READY_MARKER, sizeof(READY_MARKER));
+        int r = uart_read_bytes(UART_PORT, &init_byte, 1, pdMS_TO_TICKS(2000));
+        if (r > 0 && init_byte == 0x01) {
             ESP_LOGI(TAG, "Gateway initiation. Starting handshake.");
             run_handshake();
         }

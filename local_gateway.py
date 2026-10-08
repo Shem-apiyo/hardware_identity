@@ -284,6 +284,9 @@ def verify_terminal_signature(
 # Gateway simulation
 # ─────────────────────────────────────────────────────────────────────────────
 
+READY_MARKER = b"\xa5PPRDY\x5a\x0a"
+
+
 class GatewaySimulator:
 
     def __init__(self, port: str, baud: int):
@@ -419,7 +422,7 @@ class GatewaySimulator:
 
         # ── Step 5: Receive Sealed Transaction Record ────────────────────────
         # Longer timeout here — terminal does HKDF + ECDSA sign
-        record_timeout = UART_TIMEOUT_S * 20  # 1000ms for crypto operations
+        record_timeout = 5.0  # 1000ms for crypto operations
         print(f"[RX]      Waiting for Sealed Transaction Record (timeout={record_timeout*1000:.0f}ms)...")
         raw_record = recv_length_prefixed(port, record_timeout)
 
@@ -519,6 +522,22 @@ class GatewaySimulator:
         self.state = State.IDLE
         return True
 
+    def wait_for_ready(self, port: serial.Serial) -> None:
+        """Block until the terminal READY marker arrives. All other bytes are ignored."""
+        print("[GATEWAY] Waiting for terminal READY marker...")
+        port.reset_input_buffer()
+        window = b""
+        while True:
+            b = port.read(1)
+            if not b:
+                continue
+            window = (window + b)[-len(READY_MARKER):]
+            if window == READY_MARKER:
+                time.sleep(0.05)
+                port.reset_input_buffer()
+                print("[GATEWAY] Terminal READY.")
+                return
+
     def run(self) -> None:
         """Main gateway loop — listens for terminal initiations."""
         print(f"[GATEWAY] Opening serial port {self.port_name} at {self.baud} baud...")
@@ -539,6 +558,7 @@ class GatewaySimulator:
         try:
             while True:
                 if self.state == State.IDLE:
+                    self.wait_for_ready(port)
                     print(f"[GATEWAY] Sending initiation signal to terminal.")
                     port.write(b'\x01')
                     port.flush()

@@ -12,3 +12,6 @@ build/
 managed_components/
 sdkconfig
 sdkconfig.old
+
+*.bak
+apply_ready_fix.py
