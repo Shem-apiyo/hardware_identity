@@ -467,8 +467,6 @@ class GatewaySimulator:
             if incoming <= last:
                 self.discard(f"Replay detected: counter {incoming} <= last accepted {last} for {terminal_id_hex}", [gateway_nonce, challenge_buf])
                 return False
-            self.last_counters[terminal_id_hex] = incoming
-            self._save_counters()
             print(f"[CHECK]   Counter monotonic: {incoming} > {last} OK")
         print(f"[SCHEMA]  schema_id = 0x{schema_id:02x}", end="")
 
@@ -498,6 +496,10 @@ class GatewaySimulator:
                              [gateway_nonce, challenge_buf])
                 return False
             print(f"[VERIFY]  Terminal signature: VALID")
+            # Save the counter only after the signature is proven genuine
+            if schema_id == SCHEMA_PAYPROOF:
+                self.last_counters[terminal_id_hex] = parsed["efuse_counter"]
+                self._save_counters()
         else:
             print(f"[VERIFY]  Terminal signature: SKIPPED (terminal pubkey not in registry yet)")
             print(f"[VERIFY]  In production: registry lookup by terminal_id required here.")
