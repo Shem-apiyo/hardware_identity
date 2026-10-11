@@ -1,0 +1,130 @@
+========================================================
+PayProof Gateway Simulator — Blueprint v2.3 PoC
+========================================================
+[GATEWAY] Loading artifacts from /home/jaah/esp_puf_s3/poc_artifacts
+[GATEWAY] Certificate loaded: 444 bytes
+[GATEWAY] Gateway private key loaded.
+
+[GATEWAY] Opening serial port /dev/ttyUSB0 at 115200 baud...
+[GATEWAY] Listening. Waiting for terminal to initiate handshake.
+[GATEWAY] Press Ctrl+C to stop.
+
+[GATEWAY] Waiting for terminal READY marker...
+[GATEWAY] Terminal READY.
+[GATEWAY] Sending initiation signal to terminal.
+[STATE]   IDLE → CERT_SENT
+[TX]      Sending certificate (444 bytes) + nonce (32 bytes)
+[RX]      Waiting for Terminal_Challenge (32 bytes, timeout=2000ms)...
+[STATE]   CERT_SENT → CHALLENGE_RECEIVED
+[RX]      Terminal_Challenge: 03dfa0f64614db26...
+[SIGN]    Signing Terminal_Challenge with Gateway private key...
+[STATE]   CHALLENGE_RECEIVED → SIG_SENT
+[TX]      Sent signature (71 bytes): 304502207b0c895c...
+[RX]      Waiting for Sealed Transaction Record (timeout=5000ms)...
+[STATE]   SIG_SENT → RECORD_RECEIVED
+[RX]      Record received: 122 bytes
+[CHECK]   Gateway_Nonce match: OK
+[CHECK]   Terminal ID:    ac:27:6e:a5:86:fc
+[CHECK]   Counter (NVS):  14
+[CHECK]   Timestamp:      0 (untrusted, audit only)
+[CHECK]   Counter monotonic: 14 > 7 OK
+[SCHEMA]  schema_id = 0x01 (PayProof KES payment)
+[VERIFY]  Terminal signature: VALID
+
+========================================================
+  [TRANSACTION VALID]
+  Amount:   50.00 KES
+  Terminal: ac:27:6e:a5:86:fc
+  Counter:  14
+========================================================
+
+[GATEWAY] Waiting for terminal READY marker...
+[GATEWAY] Terminal READY.
+[GATEWAY] Sending initiation signal to terminal.
+[STATE]   IDLE → CERT_SENT
+[TX]      Sending certificate (444 bytes) + nonce (32 bytes)
+[RX]      Waiting for Terminal_Challenge (32 bytes, timeout=2000ms)...
+[STATE]   CERT_SENT → CHALLENGE_RECEIVED
+[RX]      Terminal_Challenge: a8a71fb12ec38861...
+[SIGN]    Signing Terminal_Challenge with Gateway private key...
+[STATE]   CHALLENGE_RECEIVED → SIG_SENT
+[TX]      Sent signature (72 bytes): 30460221008156a4...
+[RX]      Waiting for Sealed Transaction Record (timeout=5000ms)...
+[STATE]   SIG_SENT → RECORD_RECEIVED
+[RX]      Record received: 122 bytes
+[CHECK]   Gateway_Nonce match: OK
+[CHECK]   Terminal ID:    ac:27:6e:a5:86:fc
+[CHECK]   Counter (NVS):  15
+[CHECK]   Timestamp:      0 (untrusted, audit only)
+[CHECK]   Counter monotonic: 15 > 14 OK
+[SCHEMA]  schema_id = 0x01 (PayProof KES payment)
+[VERIFY]  Terminal signature: VALID
+
+========================================================
+  [TRANSACTION VALID]
+  Amount:   50.00 KES
+  Terminal: ac:27:6e:a5:86:fc
+  Counter:  15
+========================================================
+
+[GATEWAY] Waiting for terminal READY marker...
+[GATEWAY] Terminal READY.
+[GATEWAY] Sending initiation signal to terminal.
+[STATE]   IDLE → CERT_SENT
+[TX]      Sending certificate (444 bytes) + nonce (32 bytes)
+[RX]      Waiting for Terminal_Challenge (32 bytes, timeout=2000ms)...
+[STATE]   CERT_SENT → CHALLENGE_RECEIVED
+[RX]      Terminal_Challenge: a9784780cf43efe2...
+[SIGN]    Signing Terminal_Challenge with Gateway private key...
+[STATE]   CHALLENGE_RECEIVED → SIG_SENT
+[TX]      Sent signature (71 bytes): 3045022059b0241a...
+[RX]      Waiting for Sealed Transaction Record (timeout=5000ms)...
+[STATE]   SIG_SENT → RECORD_RECEIVED
+[RX]      Record received: 122 bytes
+[CHECK]   Gateway_Nonce match: OK
+[CHECK]   Terminal ID:    ac:27:6e:a5:86:fc
+[CHECK]   Counter (NVS):  16
+[CHECK]   Timestamp:      0 (untrusted, audit only)
+[CHECK]   Counter monotonic: 16 > 15 OK
+[SCHEMA]  schema_id = 0x01 (PayProof KES payment)
+[VERIFY]  Terminal signature: VALID
+
+========================================================
+  [TRANSACTION VALID]
+  Amount:   50.00 KES
+  Terminal: ac:27:6e:a5:86:fc
+  Counter:  16
+========================================================
+
+[GATEWAY] Waiting for terminal READY marker...
+[GATEWAY] Terminal READY.
+[GATEWAY] Sending initiation signal to terminal.
+[STATE]   IDLE → CERT_SENT
+[TX]      Sending certificate (444 bytes) + nonce (32 bytes)
+[RX]      Waiting for Terminal_Challenge (32 bytes, timeout=2000ms)...
+[STATE]   CERT_SENT → CHALLENGE_RECEIVED
+[RX]      Terminal_Challenge: fa16e94453526337...
+[SIGN]    Signing Terminal_Challenge with Gateway private key...
+[STATE]   CHALLENGE_RECEIVED → SIG_SENT
+[TX]      Sent signature (72 bytes): 3046022100ebb048...
+[RX]      Waiting for Sealed Transaction Record (timeout=5000ms)...
+[STATE]   SIG_SENT → RECORD_RECEIVED
+[RX]      Record received: 122 bytes
+[CHECK]   Gateway_Nonce match: OK
+[CHECK]   Terminal ID:    ac:27:6e:a5:86:fc
+[CHECK]   Counter (NVS):  17
+[CHECK]   Timestamp:      0 (untrusted, audit only)
+[CHECK]   Counter monotonic: 17 > 16 OK
+[SCHEMA]  schema_id = 0x01 (PayProof KES payment)
+[VERIFY]  Terminal signature: VALID
+
+========================================================
+  [TRANSACTION VALID]
+  Amount:   50.00 KES
+  Terminal: ac:27:6e:a5:86:fc
+  Counter:  17
+========================================================
+
+[GATEWAY] Waiting for terminal READY marker...
+
+[GATEWAY] Stopped by user.

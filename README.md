@@ -1,117 +1,134 @@
-# Hardware-Rooted Device Identity — a service-agnostic trust substrate (Reference Implementation)
+# Hardware-rooted device identity on ESP32-S3
 
-**PayProof** is a device-identity and mutual-authentication substrate for constrained
-microcontrollers, where the device's private key is **derived on demand from a
-read-protected eFuse and never stored at rest** — no secure element, no assumption of
-network access. It is service-agnostic: payment is one telemetry it carries, not its
-purpose.
+A proof of concept. An ESP32-S3 derives a signing key from an HMAC key held in eFuse, and uses it to prove its identity to a gateway over UART. PayProof (a 50 KES test payment record) is the example payload.
 
-This repository is a **reference implementation**, not a flashable project. It contains
-the CA/certificate tooling, a simulated gateway that runs the full handshake state
-machine, and the terminal-side firmware source that shows the on-device logic.
+**Status:** development build on a single development board. Secure Boot and Flash Encryption are not enabled. Read "Known limitations" before relying on anything here.
 
----
+## What it does
 
-## The problem
+1. The gateway proves itself to the terminal with a certificate signed by a Root CA the terminal trusts.
+2. The terminal derives a signing key from eFuse `KEY4` and signs a record.
+3. The gateway checks the record against a public key it enrolled earlier.
 
-Give each device a cryptographic identity that can't be cloned, extracted, or
-impersonated — on an ESP32-S3 with no secure element, over a transport with no TLS,
-where a replayed message must never be accepted twice. The identity and replay
-guarantees are general: they hold for any authenticated telemetry a device emits.
-Payment is one such telemetry (a replayed record double-counts a transaction), not
-the design's purpose — the substrate is service-agnostic and routes by `schema_id`.
-
-## The decision (and what was rejected)
-
-**Root of trust: eFuse HMAC, not stored keys.** The device keypair is derived as a pure
-function of a secret burned into a read-protected eFuse block (`HMAC_UP`, R/-) via the
-PSA crypto API. The private key is reconstructed in hardware on demand and never
-persisted.
-*Rejected:* storing a provisioned private key in encrypted flash — it creates a
-key-at-rest recoverable by a flash dump plus one broken firmware assumption.
-
-**Entropy: eFuse, not SRAM PUF.** An SRAM PUF was characterised first (raw entropy
-~1,487 bits/device; ~464 bits after BCH(255,119,20)×8 ECC leakage under thermal stress)
-and **abandoned** — the ESP32-S3 v0.2 die zeroes SRAM on cold power-on at the hardware
-level, below the firmware, overriding the `.noinit` region the scheme depends on.
-*Rejected:* a floating ADC pin as entropy source — multiplexer ghosting, EMI-antenna
-effects, entropy collapse, and trivial tamper injection.
-
-**Protocol: fail closed.** Dual-nonce mutual auth (the terminal issues the challenge),
-length-prefixed packed-binary records with a `schema_id` routing byte, and a DISCARD
-protocol with a hard 50 ms UART deadline. On any timeout or malformed/unverifiable
-input: zeroize buffers, reset to IDLE, increment fail counter, 60 s backoff after 3
-failures.
-*Rejected:* a RAM-only replay counter with retry-on-timeout — RAM counters reset on
-power loss (a free replay window) and generous retries turn a failed verification into a
-DoS amplifier.
-
----
-
-## Trust hierarchy
-
-```
-Root CA  →  Backend        →  Gateway            →  Terminal
-(air-gap)   (registry/CRL)    (x.509 cert on MCU)   (keypair derived from silicon)
- M-of-N                       ECDSA P-256           eFuse HMAC + PSA derivation
-```
-
-## What's in here
-
-| File | Role | Runs on |
-|------|------|---------|
-| `backend_ca.py` | Generates Root CA + Gateway EC (P-256) keypairs and X.509 DER certs; emits the Root pubkey as a C array | Host (Python) |
-| `local_gateway.py` | Simulated gateway: full handshake state machine + DISCARD protocol over UART | Host (Python, laptop) |
-| `terminal_firmware.c` | Terminal-side firmware logic: eFuse-derived identity, challenge generation, sealed-record construction | ESP32-S3 (excerpt) |
-| `root_pubkey.h` | Root CA public key, DER, as a C header | ESP32-S3 |
-
-## What's deliberately not here
-
-- **Not a buildable ESP-IDF project.** `terminal_firmware.c` is the core logic excerpt;
-  the full IDF project (CMake, partitions, `sdkconfig`) is not included.
-- **No key material.** All `.pem` artifacts are generated at runtime into a gitignored
-  directory and never committed.
+Nothing that identifies the device is stored in flash. The identity is rebuilt from `KEY4` on every handshake.
 
 ## Handshake
 
-```
-IDLE → CERT_SENT → CHALLENGE_RECEIVED → SIG_SENT → RECORD_RECEIVED → VERIFY
-```
+| Step | Sender | What happens |
+|---|---|---|
+| 1 | Terminal | Sends an 8-byte READY marker while idle |
+| 2 | Gateway | Sends its certificate and a 32-byte nonce |
+| 3 | Terminal | Verifies the certificate against the embedded Root CA certificate |
+| 4 | Terminal | Sends a 32-byte random challenge |
+| 5 | Gateway | Signs the challenge with its private key |
+| 6 | Terminal | Verifies that signature using the certificate's public key |
+| 7 | Terminal | Computes `HMAC(KEY4, fixed message)` in hardware and imports the 32-byte result as an ECDSA P-256 private key |
+| 8 | Terminal | Builds the record, signs it, destroys the key, sends the record |
+| 9 | Gateway | Checks nonce, counter and signature, in that order, then saves the counter |
 
-Gateway sends cert + 32-byte nonce; terminal replies with a 32-byte challenge; gateway
-signs it; terminal verifies, then returns a sealed transaction record; gateway parses the
-length-prefixed envelope, routes on `schema_id`, and verifies the terminal's ECDSA
-signature.
+Record layout (122 bytes): terminal MAC (6), gateway nonce (32), data length (2), schema ID (1), amount (4), currency (1), counter (4), timestamp (8), ECDSA signature (64).
 
-## Service routing (`schema_id`)
+## What has been demonstrated
 
-The sealed record carries a `schema_id` byte so the same identity and replay machinery
-serves many telemetries, not one. The transport, auth, and DISCARD path are identical
-regardless of payload — payment is just one registered schema:
+All logs are in `evidence/` and were produced in October 2026 with the code in this repository.
 
-- `0x00–0xBF` — Standard schemas (e.g. a payment record: `amount` u32 BE + `currency` u8)
-- `0xC0–0xFE` — Tenant/service-specific schemas
-- `0xFF` — Escape (extended/experimental)
+| Claim | Evidence |
+|---|---|
+| A genuine terminal completes the handshake and its record is accepted | `00_valid_handshake.log` |
+| The identity comes from `KEY4`, not from flash: the public key committed in `7f2a648` still verifies signatures after the board was fully reflashed | `00_valid_handshake.log` and the unchanged key in `local_gateway.py` |
+| A record signed by a key other than the enrolled one is rejected, and the counter store is not changed | `01_wrong_key_rejected.log` |
+| A record whose counter is at or below the last accepted one is rejected | `02_stale_counter_rejected.log` |
+| A gateway whose certificate is not signed by the trusted CA is rejected before the terminal sends a challenge or uses `KEY4` | `03_untrusted_gateway_terminal_side.log`, `03_untrusted_gateway_gateway_side.log` |
 
-Adding a new telemetry means registering a schema, not changing the trust core.
+## Known limitations
 
-```bash
-pip install cryptography pyserial
-python backend_ca.py                       # generates CA, gateway cert, root_pubkey.h
-python local_gateway.py --port /dev/ttyACM0 --baud 115200
-```
+These are true of the code as it stands.
 
-## Known limitations (PoC)
+- **The counter is stored in NVS, not eFuse.** Anyone who can rewrite flash can roll it back. Logs `01` and `02` predate a label fix and call it "eFuse Counter"; the value was always the NVS counter. A counter that burns one eFuse bit per transaction would use up a 256-bit block after 256 transactions, so it is not practical here.
+- **The derived signing key is in application RAM while signing.** `KEY4` never leaves the hardware. The key derived from it does, briefly.
+- **Secure Boot and Flash Encryption are off.** Anyone with physical access can replace the firmware, including the embedded Root CA certificate.
+- **The terminal gets no verdict from the gateway.** It logs `RECORD_SENT` and spends a counter value whether or not the gateway accepts the record.
+- **One terminal public key is hardcoded in the gateway.** There is no device registry and no enrollment tool in this repository. The key was exported once with a debug build.
+- **UART only.** No WiFi, no TCP, no TLS.
+- **The record format is custom.** It is not COSE.
+- **The timestamp is always zero** and the payload is a fixed test amount.
 
-- Gateway artifact keys are stored unencrypted (`password=None`) — a PoC convenience.
-  The production path seals identity in eFuse; artifact keys would follow suit.
-- The gateway here is a laptop simulation of the on-MCU gateway role, for protocol
-  development over UART.
-- Secure Boot V2 (RSA-3072) was validated end-to-end in a virtual-eFuse dry run; the
-  physical burn is deliberately deferred (irreversible, single working board).
+## Not tested on this build
 
-## Status
+- A record altered in transit
+- A captured record replayed into a new session
+- Fuzzing of the gateway or terminal parsers
+- Flash dump, fault injection or any other physical attack
 
-Protocol and identity model implemented and exercised over UART. Handshake reaches
-gateway-signature transmission; end-to-end sealed-record verification is under active
-debugging.
+## Roadmap
+
+- Rollback protection: a slow eFuse epoch combined with the NVS counter
+- Signed acknowledgement from gateway to terminal
+- Device registry and an enrollment procedure
+- WiFi/TCP transport with TLS
+- COSE_Sign1 record format
+- Secure Boot v2 and Flash Encryption on a production unit
+
+## Hardware and tools
+
+- ESP32-S3 with an HMAC key provisioned in eFuse `KEY4` (purpose `HMAC_UP`)
+- USB-UART bridge (CP210x used here)
+- ESP-IDF v6.0.x (built with v6.0.3)
+- Python 3 with `pyserial` and `cryptography`
+
+Provisioning `KEY4` is a one-way eFuse operation. Follow Espressif's HMAC peripheral documentation and do not improvise it.
+
+| Bridge | ESP32-S3 |
+|---|---|
+| TX | GPIO44 (RX) |
+| RX | GPIO43 (TX) |
+| GND | GND |
+
+Logs go to the board's USB Serial/JTAG port. UART0 carries only the protocol.
+
+## Build and run
+
+**1. Create your own CA and gateway certificate.**
+
+    python3 backend_ca.py
+
+**2. Embed your Root CA certificate in the firmware.** The `main/root_ca_cert.h` in this repository belongs to the author's CA and will not match yours.
+
+    openssl x509 -in poc_artifacts/root_ca_cert.pem -outform DER -out poc_artifacts/root_ca_cert.der
+    {
+      echo '#pragma once'
+      echo '#include <stdint.h>'
+      echo '#include <stddef.h>'
+      echo 'static const uint8_t ROOT_CA_CERT[] = {'
+      xxd -i < poc_artifacts/root_ca_cert.der
+      echo '};'
+      echo 'static const size_t ROOT_CA_CERT_len = sizeof(ROOT_CA_CERT);'
+    } > main/root_ca_cert.h
+
+**3. Build, flash and watch the terminal.**
+
+    idf.py -p /dev/ttyACM0 build flash monitor
+
+**4. In a second shell, start the gateway on the bridge port.**
+
+    python3 local_gateway.py --port /dev/ttyUSB0 --baud 115200
+
+To use your own board you must also replace the terminal public key hardcoded in `local_gateway.py`. See "Known limitations".
+
+## Reproducing the refusal tests
+
+- **Wrong key:** start the gateway with `terminal_pubkey_der` replaced by a freshly generated P-256 public key. Every record must fail signature verification and `poc_artifacts/counter_store.json` must not change.
+- **Stale counter:** set the stored counter in `poc_artifacts/counter_store.json` above the terminal's current counter, then run the gateway normally.
+- **Untrusted gateway:** `PYTHONPATH=. python3 tests/test_untrusted_gateway.py`, with the terminal monitor open. The refusal is visible in the terminal log.
+
+## Repository layout
+
+| Path | Purpose |
+|---|---|
+| `main/terminal_firmware.c` | Terminal firmware |
+| `main/root_ca_cert.h` | Embedded Root CA certificate (regenerate for your CA) |
+| `local_gateway.py` | Gateway simulator |
+| `backend_ca.py` | Generates the CA, gateway key and certificate |
+| `tests/` | Refusal tests |
+| `evidence/` | Logs backing the claims above |
+| `poc_artifacts/` | Private keys and certificates. Git-ignored. Never commit this folder. |

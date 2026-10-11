@@ -71,7 +71,7 @@ UART_TIMEOUT_S    = 2.0   # 50ms per receive operation
 NONCE_LEN         = 32     # Gateway_Nonce length in bytes
 CHALLENGE_LEN     = 32     # Terminal_Challenge length in bytes
 MAC_LEN           = 6      # terminal_id (MAC address)
-COUNTER_LEN       = 4      # eFuse monotonic counter
+COUNTER_LEN       = 4      # transaction counter (NVS on the terminal)
 TIMESTAMP_LEN     = 8      # RTC timestamp (untrusted, audit only)
 SIG_LEN           = 64     # ECDSA P-256 raw signature (r||s, 32+32)
 
@@ -455,7 +455,7 @@ class GatewaySimulator:
         # For PoC: just print and accept (no persistent registry yet)
         terminal_id_hex = parsed["terminal_id"].hex(":")
         print(f"[CHECK]   Terminal ID:    {terminal_id_hex}")
-        print(f"[CHECK]   eFuse Counter:  {parsed['efuse_counter']}")
+        print(f"[CHECK]   Counter (NVS):  {parsed['efuse_counter']}")
         print(f"[CHECK]   Timestamp:      {parsed['timestamp']} (untrusted, audit only)")
 
         # ── Step 9: Parse schema ─────────────────────────────────────────────

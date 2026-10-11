@@ -322,7 +322,7 @@ static void run_handshake(void)
     mbedtls_platform_zeroize(sig_buf, sig_len);
 
     fail_counter = 0;
-    ESP_LOGI(TAG, "[TRANSACTION_VALID] Sealed record sent. fail_counter reset.");
+    ESP_LOGI(TAG, "[RECORD_SENT] Sealed record sent. fail_counter reset.");
 
 cleanup:
     mbedtls_x509_crt_free(&gateway_cert);
