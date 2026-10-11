@@ -48,7 +48,7 @@ These are true of the code as it stands.
 - **The derived signing key is in application RAM while signing.** `KEY4` never leaves the hardware. The key derived from it does, briefly.
 - **Secure Boot and Flash Encryption are off.** Anyone with physical access can replace the firmware, including the embedded Root CA certificate.
 - **The terminal gets no verdict from the gateway.** It logs `RECORD_SENT` and spends a counter value whether or not the gateway accepts the record.
-- **One terminal public key is hardcoded in the gateway.** There is no device registry and no enrollment tool in this repository. The key was exported once with a debug build.
+- **One terminal public key is hardcoded in the gateway.** There is no device registry and no enrollment tool in this repository. The key was read from the board once, with code that is not included here.
 - **UART only.** No WiFi, no TCP, no TLS.
 - **The record format is custom.** It is not COSE.
 - **The timestamp is always zero** and the payload is a fixed test amount.
